@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/whiting/dsh-literature.git"
+    "url": "git+https://github.com/windwhiterain/dsh-literature.git"
   },
   "keywords": [
     "deepseek-harness",
