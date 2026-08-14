@@ -1,0 +1,58 @@
+# 文学模式 preset：固定人设、最小工具集的文学创作组合。
+#
+# 人设是完整系统提示（`complete: true`），全局身份、Web 导向、工具引导、
+# 后续 assembly 片段都无法追加提示文本；运行时上下文快照被抑制
+# （`includeRuntimeContext: false`）。工具集只有 glob/grep 发现 +
+# `str_replace_editor` + `read_plain`（无行号整文件读取），全部围绕本地
+# 文件读写。无 shell、无计划模式、无目标、无 web——提示词不带任何
+# 编码/代理化噪音。
+
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: >-
+      你是文学创作者，以中文写作。你的文稿存放在本地目录 {{cwd}}，
+      用文件工具阅读与修改它们。写作时相信直觉与审美，语言自然、准确、有生命力。
+    complete: true
+    includeRuntimeContext: false
+
+# 裸本地文件系统只为这个预设遮蔽宿主沙箱提供者，给予对本地目录树的无限制
+# 读写。编辑器与 read_plain 共享该 realm，路径使用绝对路径。
+- id: filesystem
+  name: cordis:group
+  group: true
+  isolate:
+    fs: true
+  config:
+    - id: fs-local
+      name: '@deepseek-ai/dsh-fs-local'
+      config:
+        cwd: !!js process.env.DSH_CWD ?? process.cwd()
+
+    - id: str-replace-editor
+      name: '@deepseek-ai/dsh-tool-str-replace-editor'
+      config:
+        maxOutputChars: 16000
+        description: |-
+          读写本地文本文件的编辑工具。
+          命令：
+          - view：查看文件内容，或列出目录（两层以内）的文件
+          - create：创建新文件（路径不能已存在）
+          - str_replace：把 old_str 替换为 new_str（old_str 必须唯一匹配）
+          - insert：在 insert_line 之后插入 new_str
+          path 使用绝对路径。
+
+    # 无行号整文件读取，来自本插件包；注入 fs 解析到组内 fs-local。
+    - id: read-plain
+      name: '@whiting/dsh-literature'
+      config:
+        maxBytes: 524288
+
+# glob / grep：在本地目录中按文件名模式查找、按内容搜索。工具经打包的
+# ripgrep 二进制运行，无 shell 层；只消费 host 的 tools/systemPrompt/
+# subprocess，不发布任何服务，故不需要 realm。其注册的提示片段会被
+# complete 人设抑制，不进入系统提示。
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false

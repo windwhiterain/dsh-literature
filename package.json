@@ -1,0 +1,73 @@
+{
+  "name": "@whiting/dsh-literature",
+  "description": "文学创作模式插件：极简人设 + 本地文件读写/查找/搜索工具，零编码噪音。A literary-writing agent mode for DeepSeek Harness.",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./preset/*": "./preset/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-literature": "scripts/install.mjs"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/index.d.ts",
+    "preset/**/*.yml",
+    "scripts/install.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whiting/dsh-literature.git"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "agent-preset",
+    "literature",
+    "writing",
+    "creative"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "install:preset": "node scripts/install.mjs"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "link:../deepseek-harness/vendor/cordis",
+    "@deepseek-ai/cordis-plugin-group": "link:../deepseek-harness/vendor/group",
+    "@deepseek-ai/cordis-plugin-include": "link:../deepseek-harness/vendor/include",
+    "@deepseek-ai/cordis-plugin-loader": "link:../deepseek-harness/vendor/loader",
+    "@deepseek-ai/dsh-agent": "link:../deepseek-harness/packages/core/agent",
+    "@deepseek-ai/dsh-agent-loop": "link:../deepseek-harness/packages/core/agent-loop",
+    "@deepseek-ai/dsh-agent-presets": "link:../deepseek-harness/packages/preset/agent-presets",
+    "@deepseek-ai/dsh-fs": "link:../deepseek-harness/packages/fs/fs",
+    "@deepseek-ai/dsh-fs-local": "link:../deepseek-harness/packages/fs/fs-local",
+    "@deepseek-ai/dsh-llm": "link:../deepseek-harness/packages/llm/llm",
+    "@deepseek-ai/dsh-persona": "link:../deepseek-harness/packages/preset/persona",
+    "@deepseek-ai/dsh-session": "link:../deepseek-harness/packages/core/session",
+    "@deepseek-ai/dsh-subprocess-local": "link:../deepseek-harness/packages/subprocess/subprocess-local",
+    "@deepseek-ai/dsh-system-prompt": "link:../deepseek-harness/packages/core/system-prompt",
+    "@deepseek-ai/dsh-tool-fs-search": "link:../deepseek-harness/packages/fs/tool-fs-search",
+    "@deepseek-ai/dsh-tool-str-replace-editor": "link:../deepseek-harness/packages/fs/tool-str-replace-editor",
+    "@deepseek-ai/dsh-tools": "link:../deepseek-harness/packages/core/tools",
+    "@deepseek-ai/schemastery": "link:../deepseek-harness/vendor/schemastery",
+    "@types/node": "^24.0.0",
+    "tsdown": "^0.22.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.0"
+  }
+}
