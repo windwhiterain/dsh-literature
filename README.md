@@ -20,7 +20,7 @@ DSH plugin: 极简文学创作模式（固定人设 + 本地文件读写/查找/
 
 ```bash
 # 1. 把插件装进 web profile 依赖树（包名才能被 preset 组合解析）
-dsh plugin --profile web add github:whiting/dsh-literature#main
+dsh plugin --profile web add github:windwhiterain/dsh-literature#main
 
 # 2. 把「文学」预设安装到用户预设目录（~/.dsh/.agent-presets/）
 npx dsh-literature install
