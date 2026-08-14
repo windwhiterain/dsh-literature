@@ -1,11 +1,9 @@
 <h1 align="center">dsh-literature</h1>
 
 <p align="center">
-  <strong>文学创作模式：人设即全部系统提示，零编码噪音</strong><br/>
+  <strong>文学创作模式：零编码噪音</strong><br/>
   为 DeepSeek Harness 提供极简文学 Agent 预设与无行号整文件读取工具。
 </p>
-
-DSH plugin: 极简文学创作模式（固定人设 + 本地文件读写/查找/搜索，无 shell、无计划、无目标等 agentic 噪音）; official bundle-free plugin, install via `dsh plugin --profile web add`
 
 ## 特性
 
@@ -34,7 +32,7 @@ npx dsh-literature install
 
 | 工具 | 说明 |
 |---|---|
-| `read_plain` | 读取文本文件全部内容，**不带行号**；上限可配置（默认 512 KiB） |
+| `read_plain`（新增） | 读取文本文件全部内容，**不带行号**；上限可配置（默认 512 KiB） |
 | `str_replace_editor` | 查看 / 创建 / 替换 / 插入文本文件（带行号、绝对路径） |
 | `glob` | 按文件名模式查找文件 |
 | `grep` | 按内容搜索文本 |
@@ -85,7 +83,3 @@ preset/literature/           # 文学 agent 定义（组合 + 元数据）
 scripts/install.mjs          # 安装脚本（bin: dsh-literature）
 tests/mount.spec.ts          # 真实挂载验证
 ```
-
-## License
-
-MIT
