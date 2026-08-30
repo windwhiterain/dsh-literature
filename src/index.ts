@@ -3,7 +3,8 @@
  *
  * `read_plain` 与 `str_replace_editor` 的 `view`（带行号）互补：它返回文件
  * 的原始全文，不含行号、不含截断指引、不含任何编码味注释，让模型以"读一篇
- * 文稿"而非"查第几行"的方式阅读文学作品。
+ * 文稿"而非"查第几行"的方式阅读文学作品。相对路径按调用 agent 的会话工作
+ * 目录（cwd）解析，与 dsh-tool-fs 的 read 行为一致。
  *
  * 刻意不注册任何 systemPrompt 片段：文学预设的人设是 `complete: true` 的
  * 完整系统提示，任何额外的提示文本都会稀释创作空间。
@@ -51,12 +52,12 @@ function parsePath(path: string): string {
 function registerReadPlain(ctx: Context, maxBytes: number): void {
   ctx.tools.register(defineTool({
     name: 'read_plain',
-    description: '读取文本文件的全部内容，不添加行号。适合完整阅读文稿、章节、笔记等文学作品文件。',
+    description: '读取文本文件的全部内容，不添加行号。适合完整阅读文稿、章节、笔记等文学作品文件。相对路径以当前会话的工作目录（cwd）为基准，也接受绝对路径。',
     parameters: {
       path: {
         type: 'string',
         required: true,
-        description: '要读取的文件路径。使用绝对路径。',
+        description: '要读取的文件路径。相对路径以会话工作目录（cwd）为基准，绝对路径亦可。',
       },
     },
     output: {
@@ -65,7 +66,14 @@ function registerReadPlain(ctx: Context, maxBytes: number): void {
     },
     async execute(args, exec) {
       const path = parsePath(args.path)
-      const target = await ctx.fs.resolve(path, { signal: exec.signal })
+      // 与 dsh-tool-fs 的 read 一致：相对路径以调用 agent 的会话工作目录
+      // （session.header.cwd）为基准解析，而非 fs 后端的 config.cwd（Web 下
+      // 是服务器进程 cwd，不是会话工作区）。非 agent 调用回退到后端默认值。
+      const cwd = exec.agent?.session.header.cwd
+      const target = await ctx.fs.resolve(path, {
+        ...cwd === undefined ? {} : { cwd },
+        signal: exec.signal,
+      })
       const info = await ctx.fs.stat(target, exec.signal)
       if (info === undefined) {
         throw new Error(`file not found: ${path}`)

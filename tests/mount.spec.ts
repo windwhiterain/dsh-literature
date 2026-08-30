@@ -8,6 +8,7 @@
  * 2. 工具集恰好是预期的四个（glob / grep / read_plain / str_replace_editor）
  * 3. 系统提示只有人设一节（complete 人设压掉所有其他片段）
  * 4. read_plain 真实读取文件并返回无行号全文
+ * 5. read_plain 的相对路径按会话 cwd 解析（cwd 注入）
  */
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -57,10 +58,11 @@ async function harness(roster: RosterConfig): Promise<Context> {
   return ctx
 }
 
-/** 创建会话并挂载预设，返回 agent。 */
-async function agentOn(ctx: Context, id: string, presetId: string): Promise<Agent> {
+/** 创建会话并挂载预设，返回 agent。cwd 传入时写入会话 header（模拟 Web 工作区）。 */
+async function agentOn(ctx: Context, id: string, presetId: string, cwd?: string): Promise<Agent> {
   const handle = await ctx.agents.create({
     sessionId: SessionId(id),
+    ...cwd === undefined ? {} : { meta: { cwd } },
     setup: async (agentCtx: Context) => void await ctx.agentPresets.mount(agentCtx, presetId),
   })
   return handle.agent
@@ -134,5 +136,29 @@ describe('literature preset', () => {
     // 无行号：原始文本原样返回。
     const block = result.content[0]
     expect(block.type === 'text' && block.text).toBe(content)
+  })
+
+  it('read_plain resolves a relative path against the session cwd', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'dsh-literature-rel-'))
+    const content = '相对路径正文。\n'
+    await writeFile(join(dir, 'chapter.md'), content, 'utf8')
+
+    const ctx = await harness({
+      default: 'literature',
+      roots: [{ path: dirname(PRESET_SOURCE), trust: 'user' as const }],
+      includeUserRoot: false,
+    })
+    const agent = await agentOn(ctx, 'lit-rel', 'literature', dir)
+    const definition = ctx.tools.get('read_plain', agent)
+
+    expect(definition).toBeDefined()
+    const result = await ctx.tools.execute({
+      callId: CallId('lit-rel-call'),
+      name: 'read_plain',
+      arguments: { path: 'chapter.md' },
+      agent,
+      signal: new AbortController().signal,
+    })
+    expect(result.content).toEqual([{ type: 'text', text: content }])
   })
 })
